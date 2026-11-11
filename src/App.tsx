@@ -259,7 +259,7 @@ useEffect(() => {
   analyzePublication()
 }, [selectedLink])
 
-/*add*/
+/*
 const generateComments = () => {
   if (!description.trim()) return
 
@@ -291,8 +291,53 @@ const generateComments = () => {
 
   setGeneratedComments(proposals)
   setCopiedIndex(null)
+}*/
+
+
+const generateComments = async () => {
+  if (!description.trim()) return
+
+  setCopiedIndex(null)
+
+  try {
+    const mentions = institutionalAccounts
+      .split(/[\s,]+/)
+      .filter(Boolean)
+
+    const hashtags = institutionalHashtags
+      .split(/[\s,]+/)
+      .filter(Boolean)
+
+    const response = await fetch('/api/generate-comments', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        description,
+        mentions,
+        hashtags
+      })
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      throw new Error(data.error || 'No fue posible generar los comentarios.')
+    }
+
+    setGeneratedComments(data.comments)
+
+  } catch (error) {
+    console.error('Error al generar comentarios:', error)
+    setAnalysisError(
+      error instanceof Error
+        ? error.message
+        : 'Ocurrió un error al generar comentarios.'
+    )
+  }
 }
-/*Agregue hasta aqui*/
+
 
 
 
